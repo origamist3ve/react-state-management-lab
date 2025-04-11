@@ -1,12 +1,15 @@
 // src/App.jsx
-import {useState} from 'react'
+import {useState, useRef} from 'react'
+import "./App.css";
 
 
 const App = () => {
 
-    const [team, setTeam] = useState([])
+    const [teams, setTeams] = useState([])
     const [money, setMoney] = useState(100)
-    const [zombieFighters, setzombieFighters] = useState([
+    const totalStrength = useRef(0)
+    const totalAgility = useRef(0)
+    const [zombieFighters, setZombieFighters] = useState([
         {
             id: 1,
             name: 'Survivor',
@@ -89,35 +92,78 @@ const App = () => {
         },
     ])
 
-    const handleAddFighter = (zombie) => {
-        setTeam([zombie])
+    const handleAddFighter = (fighter) => {
+        setTeams([...teams, fighter])
+        setZombieFighters(zombieFighters.filter(zombie => zombie.id !== fighter.id))
+        setMoney(money - fighter.price)
+        totalStrength.current += fighter.strength
+        totalAgility.current += fighter.agility
+        console.log(teams)
+    }
+    const handleRemoveFighter = (fighter) => {
+        setZombieFighters([...zombieFighters, fighter])
+        setTeams(teams.filter(zombie => zombie.id !== fighter.id))
+        setMoney(money + fighter.price)
+        totalStrength.current -= fighter.strength
+        totalAgility.current -= fighter.agility
     }
 
     return (
         <>
-            <h3>
-                Money: {money}
-            </h3>
+            <h1>Zombie Fighters</h1>
+            <h3>Money: {money}</h3>
+            <h3>Team Strength: {totalStrength.current}</h3>
+            <h3>Team Agility: {totalStrength.current}</h3>
+            <h3>Team</h3>
+            {teams.length === 0 ? (
+                <p>Add some team members</p>
+            ):null}
             <ul>
-                {team.map((figther,id)=> (
-                    <li key={id}>
-                        {fighter.name}
+                {/*Add condition to remove p tag when team member is added*/}
+                {teams.map((zombie)=> (
+                    <li key={zombie.id}>
+                        <img src={zombie.img}  alt={zombie.img}/>
+                        <br/>
+                        <b>{zombie.name}</b>
+                        <br/>
+                        Price: {zombie.price}
+                        <br/>
+                        Strength: {zombie.strength}
+                        <br/>
+                        Agility: {zombie.agility}
+                        <br/>
+                        <button onClick ={()=>{
+                            handleRemoveFighter(zombie)
+                        }}
+                        >
+                            Remove
+                        </button>
                     </li>
                 ))}
             </ul>
+            <h3>Fighters</h3>
            <ul>
-               {zombieFighters.map((zombie,id) => (
-                   <li key={id}>
-                       {zombie.name}
-                       {zombie.price}
-                       {zombie.strength}
-                       {zombie.agility}
-                       <button onClick ={()=>{
-                           handleAddFighter(zombie)
-                       }}
-                       >
-                           Add
-                       </button>
+               {zombieFighters.map((zombie) => (
+                   <li key={zombie.id}>
+                       <img src={zombie.img}  alt={zombie.img}/>
+                       <br/>
+                       <b>{zombie.name}</b>
+                       <br/>
+                      Price: {zombie.price}
+                       <br/>
+                       Strength: {zombie.strength}
+                       <br/>
+                       Agility: {zombie.agility}
+                       <br/>
+                       {money >= zombie.price ? (
+                           <button onClick ={()=>{
+                               handleAddFighter(zombie)
+                           }}
+                           >
+                               Add
+                           </button>
+
+                       ):<p>Not enough funds</p>}
                    </li>
                ))}
            </ul>
